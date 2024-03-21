@@ -3,6 +3,8 @@ package com.study.library.config;
 import com.study.library.security.exception.AuthEntryPoint;
 import com.study.library.security.filter.JwtAuthenticationFilter;
 import com.study.library.security.filter.PermitAllFilter;
+import com.study.library.security.handler.OAuth2SuccessHandler;
+import com.study.library.service.OAuth2PrincipalUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +29,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthEntryPoint authEntryPoint;
 
+    @Autowired
+    private OAuth2PrincipalUserService oAuth2PrincipalUserService;
+
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,12 +47,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests() // 요청 인증 절차
                 .antMatchers("/server/**", "/auth/**") // 요청 인증 받지말고 요청주소창 띄워라
                 .permitAll() // 전부 허용해라
+                .antMatchers("/mail/authenticate")
+                .permitAll()
                 .anyRequest() // 나머지 요청들은
                 .authenticated() // 인증 받아야 됨
                 .and()
                 .addFilterAfter(permitAllFilter, LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling()
-                .authenticationEntryPoint(authEntryPoint);
+                .authenticationEntryPoint(authEntryPoint)
+                .and()
+                .oauth2Login()
+                .successHandler(oAuth2SuccessHandler)
+                .userInfoEndpoint()
+                // OAuth2로그인 토큰검사
+                .userService(oAuth2PrincipalUserService)
+        ;
     }
 }

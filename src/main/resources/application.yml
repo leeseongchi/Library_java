@@ -10,9 +10,18 @@ spring:
   config:
     activate:
       on-profile: local
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            scope:
+              - email
+              - profile
 
 server:
   port: 8080
+  deploy-address: localhost
   name: local
 
 ---
@@ -21,6 +30,9 @@ spring:
   config:
     activate:
       on-profile: common
+
+client:
+  deploy-address: "localhost:3000"
 
 mybatis:
   mapper-locations:
