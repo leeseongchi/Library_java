@@ -49,6 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll() // 전부 허용해라
                 .antMatchers("/mail/authenticate")
                 .permitAll()
+                .antMatchers("/admin/**")
+                .hasRole("ADMIN")
                 .anyRequest() // 나머지 요청들은
                 .authenticated() // 인증 받아야 됨
                 .and()
